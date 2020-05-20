@@ -12,6 +12,7 @@ public class Board : MonoBehaviour
 
     // Board details
     public ESlotStatus[,] board;
+    public AIControllerBase ai_controller;
     public int missing_slots = WIDTH * HEIGTH;
     public Turn current_turn;
 
@@ -26,8 +27,6 @@ public class Board : MonoBehaviour
     void Start()
     {
         InitializeBoard();
-        InitializeUI();
-
         GameEvents.current.onSlotClicked += OnSlotClicked;
     }
 
@@ -44,11 +43,6 @@ public class Board : MonoBehaviour
         current_turn = Turn.Player;
         player_movements = new ArrayList();
         ai_movements = new ArrayList();
-    }
-
-    void InitializeUI()
-    {
-
     }
 
     void OnSlotClicked(int row, int col)
@@ -84,7 +78,25 @@ public class Board : MonoBehaviour
             return;
         }
 
-        //UpdateTurn();
+        UpdateTurn();
+        AIPlay();
+    }
+
+    void AIPlay()
+    {
+        if (current_turn == Turn.AI)
+        {
+            Movement movement = ai_controller.FindMovement(this);
+
+            if (ValidPlay(movement.row, movement.col))
+            {
+                MakePlay(movement.row, movement.col);
+            }
+            else
+            {
+                AIPlay();
+            }
+        }
     }
 
     void UpdateBoard(int row, int col)
